@@ -1,11 +1,11 @@
 const { randomUUID } = require('crypto');
 
-const products = [
-    { id: 11, title: 'Product 1' },
-    { id: 12, title: 'Product 2' },
-    { id: 13, title: 'Product 3' },
-    { id: 14, title: 'Product 4' },
-    { id: 15, title: 'Product 5' },
+let products = [
+    { id: 11, title: 'Wireless Mouse' },
+    { id: 12, title: 'Mechanical Keyboard' },
+    { id: 13, title: 'USB-C Charger' },
+    { id: 14, title: 'Bluetooth Headphones' },
+    { id: 15, title: 'Laptop Stand' },
 ]
 
 const getProductsHandler = (req, res) => {
@@ -33,20 +33,32 @@ const postProductByIdHandler = (req, res) => {
 }
 
 const putProductByIdHandler = (req, res) => {
-    const {id} = req.params;
-    const updatedProduct = {
-        id,
-        ...req.body,
+    const productId = req.params.id;
+    const { title } = req.body
+    const product = products.find(product => product.id.toString() === productId.toString());
+    
+    if (!product) {
+        return res.status(404).json({data: `Product with id ${productId} not found`});
     }
-    res.status(200).json({data: updatedProduct})
+
+    product.title = title
+    res.status(200).json({data: product})
 }
 
 const deleteProductByIdHandler = (req, res) => {
-    const {id} = req.params;
-    res.status(200).json({data: `Delete product by id - ${id}`})
+    const productId = req.params.id;
+    const product = products.find(product => product.id.toString() === productId.toString());
+    
+    if (!product) {
+        return res.status(404).json({data: `Product with id ${productId} not found`});
+    }
+
+    products = products.filter(product => product.id.toString() !== productId.toString());
+    return res.status(200).json({data: `Delete product by id - ${id}`})
 }
 
 module.exports = {
+    products,
     getProductsHandler,
     postProductsHandler,
     getProductByIdHandler,

@@ -1,11 +1,11 @@
 const { randomUUID } = require('crypto');
 
-const users = [
-    { id: 1, name: 'John' },
-    { id: 2, name: 'Steve' },
-    { id: 3, name: 'Jane' },
-    { id: 4, name: 'Noah' },
-    { id: 5, name: 'Jack' },
+let users = [
+    { id: 1, name: 'John Doe' },
+    { id: 2, name: 'Steve Jobs' },
+    { id: 3, name: 'Jane Doe' },
+    { id: 4, name: 'Noah Doe' },
+    { id: 5, name: 'Jack Doe' },
 ]
 
 const getUsersHandler = (req, res) => {
@@ -36,20 +36,32 @@ const postUsersByIdHandler = (req, res) => {
 }
 
 const putUsersByIdHandler = (req, res) => {
-    const {id} = req.params;
-    const updatedUser = {
-        id,
-        ...req.body,
+    const userId = req.params.id;
+    const { name } = req.body;
+    const user = users.find(user => user.id.toString() === userId.toString());
+    
+    if (!user) {
+        return res.status(404).json({data: `User with id ${userId} not found`});
     }
-    res.status(200).json({data: updatedUser});
+
+    users.name = name
+    res.status(200).json({data: user});
 }
 
 const deleteUsersByIdHandler = (req, res) => {
-    const {id} = req.params;
-    res.status(200).json({data: `Delete user by id - ${id}`});
+    const userId = req.params.id
+    const user = users.find(user => user.id.toString() === userId.toString());
+    
+    if (!user) {
+        return res.status(404).json({data: `User with id ${userId} not found`});
+    }
+
+    users = users.filter(user => user.id.toString() !== userId.toString());
+    return res.status(200).json({data: `Delete user by id - ${id}`});
 }
 
 module.exports = {
+    users,
     getUsersHandler,
     postUsersHandler,
     getUsersByIdHandler,

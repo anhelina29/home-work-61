@@ -1,7 +1,7 @@
 const usersAuth = (req, res, next) => {
-    const {user} = req.body;
-    if (!user) {
-        return res.status(401).json({message: 'Unauthorized'})
+    const userId = req.headers['x-user-id'];
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' })
     }
     next()
 }

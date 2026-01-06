@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Products list</h1>
+    <div class="container">
+        <% if (product) { %>
+            <p>ID: <%= product.id %></p>
+            <p>Title: <%= product.title %></p>
+        <% } else if (products.length === 0) { %>
+            <p>No products found</p>
+        <% } else { %>
+            <% products.forEach(product => { %>
+                <p><%= product.id %>. <%= product.title %></p>
+            <% }) %>
+        <% } %>
+    </div>
+
+</body>
+</html>

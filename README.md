@@ -165,16 +165,17 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID користувача
 
+**Headers:**
+- `x-user-id` - обов'язковий header для аутентифікації
+
 **Тіло запиту:**
 ```json
 {
-  "user": "authenticated-user",
   "name": "Updated Name"
 }
 ```
 
 **Валідація:**
-- `user` - обов'язкове поле для аутентифікації
 - `name` - обов'язкове поле, рядок, мінімум 3 символи
 
 **Відповідь (без аутентифікації):**
@@ -197,10 +198,12 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID користувача
 
+**Headers:**
+- `x-user-id` - обов'язковий header для аутентифікації
+
 **Тіло запиту:**
 ```json
 {
-  "user": "authenticated-user",
   "name": "Updated Name"
 }
 ```
@@ -227,12 +230,8 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID користувача
 
-**Тіло запиту:**
-```json
-{
-  "user": "authenticated-user"
-}
-```
+**Headers:**
+- `x-user-id` - обов'язковий header для аутентифікації
 
 **Відповідь:**
 ```json
@@ -318,16 +317,17 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID продукту
 
+**Headers:**
+- `x-user-role` - обов'язковий header, має бути "admin"
+
 **Тіло запиту:**
 ```json
 {
-  "role": "admin",
   "title": "Updated Product"
 }
 ```
 
 **Валідація:**
-- `role` - має бути "admin"
 - `title` - обов'язкове поле, рядок, мінімум 3 символи
 
 **Відповідь (без прав доступу):**
@@ -350,10 +350,12 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID продукту
 
+**Headers:**
+- `x-user-role` - обов'язковий header, має бути "admin"
+
 **Тіло запиту:**
 ```json
 {
-  "role": "admin",
   "title": "Updated Product"
 }
 ```
@@ -380,12 +382,8 @@ Welcome to the server!
 **Параметри:**
 - `id` - ID продукту
 
-**Тіло запиту:**
-```json
-{
-  "role": "admin"
-}
-```
+**Headers:**
+- `x-user-role` - обов'язковий header, має бути "admin"
 
 **Відповідь (успіх):**
 ```json
@@ -448,7 +446,7 @@ Welcome to the server!
 ### 4. Аутентифікація (`usersAuth`)
 **Файл:** `api/users/users.auth.js`
 
-Перевіряє наявність поля `user` в тілі запиту.
+Перевіряє наявність header `x-user-id` в запиті.
 
 **Використання:** POST, PUT, DELETE операції з користувачами
 
@@ -457,7 +455,7 @@ Welcome to the server!
 ### 5. Перевірка прав доступу (`productAccess`)
 **Файл:** `api/products/productsAccess.js`
 
-Перевіряє, чи користувач має роль `admin`.
+Перевіряє, чи header `x-user-role` має значення `admin`.
 
 **Використання:** POST, PUT, DELETE операції з продуктами
 
@@ -536,14 +534,15 @@ curl http://localhost:3000/api/users
 ```bash
 curl -X DELETE http://localhost:3000/api/products/1 \
   -H "Content-Type: application/json" \
-  -d '{"role":"admin"}'
+  -H "x-user-role: admin"
 ```
 
 ### Оновлення користувача (потрібна аутентифікація)
 ```bash
 curl -X PUT http://localhost:3000/api/users/1 \
   -H "Content-Type: application/json" \
-  -d '{"user":"testuser","name":"Updated Name"}'
+  -H "x-user-id: testuser" \
+  -d '{"name":"Updated Name"}'
 ```
 
 ---
