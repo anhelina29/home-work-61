@@ -11,38 +11,38 @@ let users = [
 ]
 
 const getUsersHandler = (req, res) => {
-    res.status(200).json({data: users});
+    res.status(200).json({ data: users });
 }
 
 const getUsersByIdHandler = (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
     const user = users.find(user => user.id.toString() === id.toString());
-    res.status(200).json({data: user});
+    res.status(200).json({ data: user });
 }
 
 const putUsersByIdHandler = (req, res) => {
     const userId = req.params.id;
     const { name } = req.body;
     const user = users.find(user => user.id.toString() === userId.toString());
-    
+
     if (!user) {
-        return res.status(404).json({data: `User with id ${userId} not found`});
+        return res.status(404).json({ data: `User with id ${userId} not found` });
     }
 
     user.name = name
-    res.status(200).json({data: user});
+    res.status(200).json({ data: user });
 }
 
 const deleteUsersByIdHandler = (req, res) => {
     const userId = req.params.id
     const user = users.find(user => user.id.toString() === userId.toString());
-    
+
     if (!user) {
-        return res.status(404).json({data: `User with id ${userId} not found`});
+        return res.status(404).json({ data: `User with id ${userId} not found` });
     }
 
     users = users.filter(user => user.id.toString() !== userId.toString());
-    return res.status(200).json({data: `Delete user by id - ${userId}`});
+    return res.status(200).json({ data: `Delete user by id - ${userId}` });
 }
 
 const renderUsers = (req, res) => {
@@ -82,50 +82,30 @@ const signUp = async (req, res) => {
 
     users.push(newUser)
     return res.status(201).json(newUser)
-    
+
 }
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
-
-    const user = users.find(user => user.email.toString() === email.toString());
-
-    if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+    try {
+        res.status(200).json({ data: 'Login successful!' })
+    } catch (err) {
+        res.status(400).json({ error: 'Login failed!' })
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-        return res.status(401).json({ error: 'Invalid password' });
-    }
-
-    const token = jwt.sign(
-        { 
-            id: user.id 
-        }, 
-        process.env.JWT_SECRET,
-        { 
-            expiresIn: '1h' 
-        }
-    );
-
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure: false,
-        maxAge: 60 * 60 * 1000
-    });
-
-    return res.status(200).json({ user });
 }
 
 const logout = (req, res) => {
-    res.clearCookie('token', {
-        httpOnly: true,
-        secure: false,
-        maxAge: 60 * 60 * 1000
-    });
-    return res.status(200).json({ data: 'Logout successful' });
+    try {
+        return req.logout((err) => {
+            if (err) {
+                return res.status(400).json({ error: 'Logout failed!' })
+            }
+            return res.status(200).json({ data: 'Logout successful' });
+        })
+    } catch (err) {
+        return res.status(400).json({ error: 'Logout failed!' })
+    }
+
 }
 
 module.exports = {
@@ -137,5 +117,6 @@ module.exports = {
     renderUsersById,
     signUp,
     login,
-    logout
+    logout,
+    users
 }

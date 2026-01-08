@@ -3,6 +3,7 @@ const router = express.Router();
 const usersCtrl = require('./users.ctrl');
 const usersValidator = require('./usersValidator');
 const authMiddleware = require('../common/middlewares/auth');
+const passport = require('passport');
 
 
 router.get('/', authMiddleware.checkAuth, usersCtrl.getUsersHandler);
@@ -13,7 +14,7 @@ router.put('/:id', authMiddleware.checkAuth, usersValidator.putUsersValidator, u
 router.delete('/:id', authMiddleware.checkAuth, usersCtrl.deleteUsersByIdHandler);
 
 router.post('/sign-up', usersCtrl.signUp);
-router.post('/login', usersCtrl.login);
+router.post('/login', passport.authenticate('local'), usersCtrl.login);
 router.post('/logout', usersCtrl.logout);
 
 module.exports = router;

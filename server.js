@@ -2,25 +2,33 @@ const express = require('express');
 const session = require('express-session');
 const indexRouter = require('./api/index.router');
 const app = express();
-const logMiddleware = require('./api/common/middlewares/logMiddleware');
-const users = require('./api/users/users.ctrl');
-const products = require('./api/products/products.ctrl');
+const morgan = require('morgan');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const passport = require('passport');
+require('./config/passport')(passport)
 
 
 const PORT = 3000
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(logMiddleware)
+app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     secret: 'secret-key',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        httpOnly: true,
+    }
 }));
 app.use(cookieParser());
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/api', indexRouter)
 app.set('views', path.join(__dirname, 'views'));
 
