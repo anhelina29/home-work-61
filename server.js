@@ -5,11 +5,14 @@ const app = express();
 const morgan = require('morgan');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const connectDB = require('./config/db');
 const passport = require('passport');
 require('./config/passport')(passport)
 
 
-const PORT = 3000
+const PORT = 3001
+
+connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

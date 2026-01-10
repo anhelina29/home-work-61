@@ -1,86 +1,81 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const UserModel = require('../../models/users');
 
-let users = [
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com', password: 'password123' },
-    { id: 2, name: 'Steve Jobs', email: 'steve.jobs@example.com', password: 'password123' },
-    { id: 3, name: 'Jane Doe', email: 'jane.doe@example.com', password: 'password123' },
-    { id: 4, name: 'Noah Doe', email: 'noah.doe@example.com', password: 'password123' },
-    { id: 5, name: 'Jack Doe', email: 'jack.doe@example.com', password: 'password123' },
-]
+const getUsersByIdHandler = async (req, res) => {
+    const userId = req.params.id;
+    const user = await UserModel.findById(userId);
 
-const getUsersHandler = (req, res) => {
-    res.status(200).json({ data: users });
-}
+    if (!user) {
+        return res.status(404).json({ error: `User with id ${userId} not found` });
+    }
 
-const getUsersByIdHandler = (req, res) => {
-    const { id } = req.params;
-    const user = users.find(user => user.id.toString() === id.toString());
     res.status(200).json({ data: user });
 }
 
-const putUsersByIdHandler = (req, res) => {
+const putUsersByIdHandler = async (req, res) => {
     const userId = req.params.id;
     const { name } = req.body;
-    const user = users.find(user => user.id.toString() === userId.toString());
+    const user = await UserModel.findById(userId);
 
     if (!user) {
-        return res.status(404).json({ data: `User with id ${userId} not found` });
+        return res.status(404).json({ error: `User with id ${userId} not found` });
     }
 
     user.name = name
     res.status(200).json({ data: user });
 }
 
-const deleteUsersByIdHandler = (req, res) => {
+const deleteUsersByIdHandler = async (req, res) => {
     const userId = req.params.id
-    const user = users.find(user => user.id.toString() === userId.toString());
+    const user = await UserModel.findById(userId);
 
     if (!user) {
-        return res.status(404).json({ data: `User with id ${userId} not found` });
+        return res.status(404).json({ error: `User with id ${userId} not found` });
     }
 
-    users = users.filter(user => user.id.toString() !== userId.toString());
+    await UserModel.deleteOne({ _id: userId })
+
     return res.status(200).json({ data: `Delete user by id - ${userId}` });
 }
 
-const renderUsers = (req, res) => {
+const renderUsers = async (req, res) => {
+    const users = await UserModel.find()
     const data = {
         title: 'Users',
-        users: users
+        users: users,
+        user: null
     }
     res.render('users.pug', data);
 }
 
-const renderUsersById = (req, res) => {
+const renderUsersById = async (req, res) => {
     const userId = req.params.id;
-    const user = users.find(user => user.id.toString() === userId.toString());
+    const user = await UserModel.findById(userId);
     const data = {
         title: 'Users',
-        user: user
+        user: user,
+        users: null
     }
     res.render('users.pug', data);
 }
 
 const signUp = async (req, res) => {
     const { name, email, password } = req.body;
-    const user = users.find(user => user.email.toString() === email.toString());
+    const isExistingUser = await UserModel.findOne({ email: email });
 
-    if (user) {
+    if (isExistingUser) {
         return res.status(400).json({ error: 'User already exists' });
     }
 
     const hash = await bcrypt.hash(password, 10);
 
-    const newUser = {
-        id: randomUUID(),
+    const newUser = await UserModel.create({
         name: name,
         email: email,
         password: hash,
-    }
-
-    users.push(newUser)
+    })
     return res.status(201).json(newUser)
 
 }
@@ -109,7 +104,6 @@ const logout = (req, res) => {
 }
 
 module.exports = {
-    getUsersHandler,
     getUsersByIdHandler,
     putUsersByIdHandler,
     deleteUsersByIdHandler,
@@ -117,6 +111,5 @@ module.exports = {
     renderUsersById,
     signUp,
     login,
-    logout,
-    users
+    logout
 }

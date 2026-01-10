@@ -6,7 +6,6 @@ const authMiddleware = require('../common/middlewares/auth');
 const passport = require('passport');
 
 
-router.get('/', authMiddleware.checkAuth, usersCtrl.getUsersHandler);
 router.get('/render', usersCtrl.renderUsers);
 router.get('/render/:id', usersCtrl.renderUsersById)
 router.get('/:id', authMiddleware.checkAuth, usersCtrl.getUsersByIdHandler);

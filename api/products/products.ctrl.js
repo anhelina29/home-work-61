@@ -1,77 +1,77 @@
-const { randomUUID } = require('crypto');
+const ProductModel = require('../../models/products');
 
-let products = [
-    { id: 11, title: 'Wireless Mouse' },
-    { id: 12, title: 'Mechanical Keyboard' },
-    { id: 13, title: 'USB-C Charger' },
-    { id: 14, title: 'Bluetooth Headphones' },
-    { id: 15, title: 'Laptop Stand' },
-]
-
-const getProductsHandler = (req, res) => {
+const getProductsHandler = async (req, res) => {
+    const products = await ProductModel.find()
     res.status(200).json({data: products})
 }
 
-const postProductsHandler = (req, res) => {
-    const { title } = req.body
-    const newProduct = {
-        id: randomUUID(),
-        title: title,
+const getProductByIdHandler = async (req, res) => {
+    const productId = req.params.id;
+    const product = await ProductModel.findById(productId);
+    
+    if (!product) {
+        return res.status(404).json({data: `Product with id ${productId} not found`});
     }
-    res.status(201).json({data: newProduct})
-}
-
-const getProductByIdHandler = (req, res) => {
-    const {id} = req.params;
-    const product = products.find(product => product.id.toString() === id.toString());
+    
     res.status(200).json({data: product})
 }
 
-const postProductByIdHandler = (req, res) => {
-    const {id} = req.params;
-    res.status(200).json({data: `Post product by id - ${id}`})
+const postProductsHandler = async (req, res) => {
+    const { name, description, price, stock } = req.body
+    const newProduct = await ProductModel.create({
+        name: name,
+        description: description,
+        price: price,
+        stock: stock
+    })
+    res.status(201).json({newProduct})
 }
 
-const putProductByIdHandler = (req, res) => {
+const putProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
-    const { title } = req.body
-    const product = products.find(product => product.id.toString() === productId.toString());
+    const { price, stock } = req.body
+    const product = await ProductModel.findById(productId)
     
     if (!product) {
         return res.status(404).json({data: `Product with id ${productId} not found`});
     }
 
-    product.title = title
+    product.price = price
+    product.stock = stock
+
     res.status(200).json({data: product})
 }
 
-const deleteProductByIdHandler = (req, res) => {
+const deleteProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
-    const product = products.find(product => product.id.toString() === productId.toString());
+    const product = await ProductModel.findById(productId)
     
     if (!product) {
         return res.status(404).json({data: `Product with id ${productId} not found`});
     }
 
-    products = products.filter(product => product.id.toString() !== productId.toString());
-    return res.status(200).json({data: `Delete product by id - ${id}`})
+    await ProductModel.deleteOne({ _id: productId })
+    
+    return res.status(200).json({data: `Delete product by id - ${productId}`})
 }
 
-const renderProducts = (req, res) => {
+const renderProducts = async (req, res) => {
+    const products = await ProductModel.find()
     const data = {
         title: 'Products',
-        product: null,
-        products: products
+        products: products,
+        product: null
     }
     res.render('products.ejs', data);
 }
 
-const renderProductsById = (req, res) => {
+const renderProductsById = async (req, res) => {
     const productId = req.params.id
-    const product = products.find(product => product.id.toString() === productId.toString());
+    const product = await ProductModel.findById(productId)
     const data = {
         title: 'Products',
         product: product,
+        products: null
     }
     res.render('products.ejs', data);
 }
@@ -80,7 +80,6 @@ module.exports = {
     getProductsHandler,
     postProductsHandler,
     getProductByIdHandler,
-    postProductByIdHandler,
     putProductByIdHandler,
     deleteProductByIdHandler,
     renderProducts,

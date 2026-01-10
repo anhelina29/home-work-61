@@ -1,15 +1,19 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs')
-const { users } = require('../api/users/users.ctrl')
+const UserModel = require('../models/users')
 
 module.exports = (passport) => {
     try {
         passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
-            const user = users.find(user => user.email.toString() === email.toString())
+            const user = await UserModel.findOne({ email: email })
+
+            if (!user) {
+                return done(null, false)
+            }
 
             const isPasswordValid = await bcrypt.compare(password, user.password)
 
-            if (!user || !isPasswordValid) {
+            if (!isPasswordValid) {
                 return done(null, false)
             }
 
@@ -17,11 +21,11 @@ module.exports = (passport) => {
         }))
 
         passport.serializeUser((user, done) => {
-            done(null, user.email)
+            done(null, user.id)
         })
 
-        passport.deserializeUser((email, done) => {
-            const user = users.find(user => user.email.toString() === email.toString())
+        passport.deserializeUser(async (id, done) => {
+            const user = await UserModel.findById(id)
             done(null, user)
         })
     } catch (err) {

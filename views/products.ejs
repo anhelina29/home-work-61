@@ -7,20 +7,40 @@
     <link rel="icon" href="/favicon.ico">
     <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-    <h1>Products list</h1>
-    <div class="container">
-        <% if (product) { %>
-            <p>ID: <%= product.id %></p>
-            <p>Title: <%= product.title %></p>
-        <% } else if (!products || products.length === 0) { %>
-            <p>No products found</p>
-        <% } else { %>
-            <% products.forEach(product => { %>
-                <p><%= product.id %>. <%= product.title %></p>
-            <% }) %>
-        <% } %>
-    </div>
 
+<body>
+    <h1>Parfumes list</h1>
+    <div class="container">
+
+        <% if (product) { %>
+            <p>ID: <%= product._id %></p>
+            <p>Name: <%= product.name %></p>
+            <p>Description: <%= product.description %></p>
+            <p>Price: <%= product.price %></p>
+            <p>Stock: <%= product.stock %></p>
+        <% } else if (!products || products.length === 0) { %>
+            <p>No parfumes found</p>
+        <% } else { %>
+            <div class="cards">
+            <% products.forEach(product => { %>
+                <div class="card">
+                    <div class="card-img">
+                        <img src="<%= product.image || '/placeholder.png' %>" alt="<%= product.name %>">
+                    </div>
+                    <div class="card-content">
+                        <h3><%= product.name %></h3>
+                        <p class="desc"><%= product.description.slice(0, 90) %>...</p>
+                        <div class="meta">
+                            <span class="price">$<%= product.price %></span>
+                            <span class="stock">Stock: <%= product.stock %></span>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <% } %>
+
+    </div>
 </body>
 </html>
