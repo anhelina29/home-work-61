@@ -42,7 +42,7 @@ const createProductsHandler = async (req, res) => {
 const putProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
     const { price, stock } = req.body
-    const product = await ProductModel.findByIdAndUpdate(productId, { price, stock }, { new: true })
+    const product = await ProductModel.findByIdAndUpdate(productId, { $set: { price, stock } }, { new: true })
 
     if (!product) {
         return res.status(404).json({ data: `Product with id ${productId} not found` });

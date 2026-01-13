@@ -1,15 +1,52 @@
 const OrderModel = require('../../models/orders');
-
-const projection = {
-    userId: 1,
-    products: 1,
-    totalPrice: 1,
-    status: 1,
-}
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const getOrdersHandler = async (req, res) => {
-    const orders = await OrderModel.find({totalPrice: {$gt: 500}}, projection)
+    const page = req.query.page || 1
+    const limit = req.query.limit || 100
+
+    const orders = await OrderModel.find()
+    .sort({ createdAt: -1 })
+    .skip((page-1) * limit)
+    .limit(limit)
     res.status(200).json({data: orders})
+}
+
+const getOrdersData = async (req, res) => {
+    const userId = req.params.userId;
+    const ordersData = await OrderModel.aggregate()
+    .match({
+        userId: new ObjectId(userId),
+        createdAt: {
+            $gte: new Date('2026-01-01'),
+            $lte: new Date('2026-02-01')
+        }
+    })
+    .group({
+        _id: '$userId',
+        ordersId: { 
+            $push: '$_id'
+        },
+        totalOrdersSum: {
+            $sum: '$totalPrice' 
+        }
+    })
+    .project({
+        _id: 0,
+        userId: '$_id',
+        ordersId: 1,
+        totalOrdersSum: 1
+    })
+    .lookup({
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user'
+    })
+    .unwind('$user')
+
+    res.status(200).json({data: ordersData})
 }
 
 const getOrdersByIdHandler = async (req, res) => {
@@ -56,7 +93,7 @@ const putOrdersByIdHandler = async (req, res) => {
 }
 
 const updateOrdersHandler = async (req, res) => {
-    const orders = await OrderModel.updateMany({status: 'pending'}, {status: 'confirmed'})
+    const orders = await OrderModel.updateMany({status: 'pending'}, {$set: {status: 'confirmed'}})
     res.status(200).json({data: 'Status of orders updated'})
 }
 
@@ -105,6 +142,7 @@ const renderOrdersById = async (req, res) => {
 module.exports = {
     getOrdersHandler,
     getOrdersByIdHandler,
+    getOrdersData,
     postOrdersHandler,
     createOrdersHandler,
     putOrdersByIdHandler,
