@@ -1,4 +1,4 @@
-const ProductModel = require('../../models/products');
+const ProductService = require('./products.service')
 
 const projection = {
     _id: 0,
@@ -8,13 +8,13 @@ const projection = {
 }
 
 const getProductsHandler = async (req, res) => {
-    const products = await ProductModel.find({ price: { $gt: 150 } }, projection)
+    const products = await ProductService.getProductList({ price: { $gt: 150 } }, projection)
     res.status(200).json({ data: products })
 }
 
 const getProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
-    const product = await ProductModel.findById(productId);
+    const product = await ProductService.getProductById(productId);
 
     if (!product) {
         return res.status(404).json({ data: `Product with id ${productId} not found` });
@@ -25,7 +25,7 @@ const getProductByIdHandler = async (req, res) => {
 
 const postProductsHandler = async (req, res) => {
     const { name, description, price, stock } = req.body
-    const newProduct = await ProductModel.create({
+    const newProduct = await ProductService.postProduct({
         name: name,
         description: description,
         price: price,
@@ -35,14 +35,14 @@ const postProductsHandler = async (req, res) => {
 }
 
 const createProductsHandler = async (req, res) => {
-    const products = await ProductModel.insertMany(req.body)
+    const products = await ProductService.createProducts(req.body)
     res.status(201).json({ data: products })
 }
 
 const putProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
     const { price, stock } = req.body
-    const product = await ProductModel.findByIdAndUpdate(productId, { $set: { price, stock } }, { new: true })
+    const product = await ProductService.putProductById(productId, { price, stock })
 
     if (!product) {
         return res.status(404).json({ data: `Product with id ${productId} not found` });
@@ -52,13 +52,13 @@ const putProductByIdHandler = async (req, res) => {
 }
 
 const updateProductsHandler = async (req, res) => {
-    const products = await ProductModel.updateMany({ stock: 0 }, { $set: { isActive: false } })
+    const products = await ProductService.updateProducts({ stock: 0 }, { isActive: false })
     res.status(200).json({ data: `Update products with stock = 0` })
 }
 
 const deleteProductByIdHandler = async (req, res) => {
     const productId = req.params.id;
-    const product = await ProductModel.findByIdAndDelete(productId)
+    const product = await ProductService.deleteProductById(productId)
 
     if (!product) {
         return res.status(404).json({ data: `Product with id ${productId} not found` });
@@ -68,13 +68,13 @@ const deleteProductByIdHandler = async (req, res) => {
 }
 
 const deleteProductsHandler = async (req, res) => {
-    const products = await ProductModel.deleteMany({ isActive: false })
+    const products = await ProductService.deleteProducts({ isActive: false })
     res.status(200).json({ data: `Delete products with isActive = false` })
 }
 
 
 const renderProducts = async (req, res) => {
-    const products = await ProductModel.find()
+    const products = await ProductService.getProductList()
     const data = {
         title: 'Products',
         products: products,
@@ -85,7 +85,7 @@ const renderProducts = async (req, res) => {
 
 const renderProductsById = async (req, res) => {
     const productId = req.params.id
-    const product = await ProductModel.findById(productId)
+    const product = await ProductService.getProductById(productId)
     const data = {
         title: 'Products',
         product: product,
